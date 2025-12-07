@@ -1,0 +1,15 @@
+[project]
+name = "iran-wildfire-mcp-server"
+version = "0.1.0"
+description = "MCP server for Iran Wildfire Detection"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dotenv>=0.9.9",
+    "earthengine-api>=1.7.1",
+    "google-genai>=1.52.0",
+    "is-in-iran>=0.1.0",
+    "pandas>=2.3.3",
+    "python-dotenv>=1.2.1",
+    "requests>=2.32.5",
+]
