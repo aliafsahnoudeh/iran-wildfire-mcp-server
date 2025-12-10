@@ -4,6 +4,8 @@ from mcp.server.fastmcp import FastMCP
 
 from src.domains.nasa_firms.core import get_fires_in_iran
 from src.domains.open_weather_map.core import (
+    get_current_air_pollution_data,
+    get_historical_air_pollution_data,
     get_openweather_onecall,
     get_reverse_geocoding,
 )
@@ -44,7 +46,7 @@ async def reverse_geocoding(
 
 
 @mcp.tool()
-async def get_nasa_frims_fires_in_iran(
+async def nasa_frims_fires_in_iran(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     frp: float = 10,
@@ -66,7 +68,7 @@ async def get_nasa_frims_fires_in_iran(
 
 
 @mcp.tool()
-async def get_openweather_onecall_data(
+async def openweather_onecall_data(
     latitude: float,
     longitude: float,
     api_key: Optional[str] = None,
@@ -87,6 +89,60 @@ async def get_openweather_onecall_data(
     response = get_openweather_onecall(
         latitude=latitude,
         longitude=longitude,
+        api_key=api_key,
+        timeout=timeout,
+    )
+    return response.to_human_readable()  # type: ignore
+
+
+@mcp.tool()
+async def current_air_pollution_data(
+    latitude: float,
+    longitude: float,
+    api_key: Optional[str] = None,
+    timeout: int = 30,
+) -> str:
+    """
+    Air Pollution API provides current and forecast air pollution data for any coordinates on the globe.
+
+    Parameters:
+    latitude	required	Latitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API
+    longitude	required	Longitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API
+
+    """
+    response = get_current_air_pollution_data(
+        latitude=latitude,
+        longitude=longitude,
+        api_key=api_key,
+        timeout=timeout,
+    )
+    return response.to_human_readable()  # type: ignore
+
+
+@mcp.tool()
+async def historical_air_pollution_data(
+    latitude: float,
+    longitude: float,
+    start: int,  # Unix timestamp
+    end: int,  # Unix timestamp
+    api_key: Optional[str] = None,
+    timeout: int = 30,
+) -> str:
+    """
+    Air Pollution API provides historical air pollution data for any coordinates on the globe.
+
+    Parameters:
+    latitude	required	Latitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API
+    longitude	required	Longitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API
+    start	required	Start of the period (Unix timestamp)
+    end	required	End of the period (Unix timestamp)
+
+    """
+    response = get_historical_air_pollution_data(
+        latitude=latitude,
+        longitude=longitude,
+        start=start,
+        end=end,
         api_key=api_key,
         timeout=timeout,
     )
