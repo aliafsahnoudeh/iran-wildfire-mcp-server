@@ -2,6 +2,7 @@ from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
 
+from src.domains.nasa_firms.core import get_fires_in_iran
 from src.domains.open_weather_map.core import get_reverse_geocoding
 
 mcp = FastMCP("iran_wildfire")
@@ -37,6 +38,28 @@ async def reverse_geocoding(
         timeout=timeout,
     )
     return response.to_human_readable(response)  # type: ignore
+
+
+@mcp.tool()
+async def get_nasa_frims_fires_in_iran(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    frp: float = 10,
+    bright_ti4: float = 330,
+) -> str:
+    """
+    Query NASA FIRMS for fire detections inside Iran.
+    """
+    response = get_fires_in_iran(
+        start_date=start_date,
+        end_date=end_date,
+        frp=frp,
+        bright_ti4=bright_ti4,
+    )
+
+    return "Fires detected by NASA FIRMS:\n\n" + "".join(
+        [fire.to_human_readable(i) for i, fire in enumerate(response, 1)]
+    )
 
 
 def main():
