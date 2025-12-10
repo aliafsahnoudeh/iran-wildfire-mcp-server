@@ -160,6 +160,40 @@ class ForecastResponse:
             city=city,
         )
 
+    def to_human_readable(self) -> str:
+        """Convert forecast data to human-readable format."""
+        output = []
+        output.append(
+            f"5-Day Weather Forecast for {self.city.name}, {self.city.country}"
+        )
+        output.append("=" * 70)
+
+        for item in self.list:
+            from datetime import datetime
+
+            timestamp = datetime.fromtimestamp(item.dt).strftime("%Y-%m-%d %H:%M:%S")
+            weather_desc = ", ".join(
+                [f"{w.main} ({w.description})" for w in item.weather]
+            )
+            rain_volume = item.rain.three_h if item.rain else 0.0
+            snow_volume = item.snow.three_h if item.snow else 0.0
+
+            output.append(f"\nTimestamp: {timestamp}")
+            output.append(f"Weather: {weather_desc}")
+            output.append(
+                f"Temperature: {item.main.temp}K (Feels like: {item.main.feels_like}K)"
+            )
+            output.append(f"Humidity: {item.main.humidity}%")
+            output.append(f"Wind: {item.wind.speed} m/s at {item.wind.deg}°")
+            output.append(f"Cloudiness: {item.clouds.all}%")
+            output.append(f"Visibility: {item.visibility} meters")
+            output.append(f"Precipitation Probability: {item.pop * 100}%")
+            output.append(f"Rain Volume (last 3h): {rain_volume} mm")
+            output.append(f"Snow Volume (last 3h): {snow_volume} mm")
+            output.append("-" * 70)
+
+        return "\n".join(output)
+
 
 @dataclass
 class AirQualityMain:

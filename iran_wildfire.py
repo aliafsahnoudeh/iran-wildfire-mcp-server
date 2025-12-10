@@ -3,7 +3,10 @@ from typing import Optional
 from mcp.server.fastmcp import FastMCP
 
 from src.domains.nasa_firms.core import get_fires_in_iran
-from src.domains.open_weather_map.core import get_reverse_geocoding
+from src.domains.open_weather_map.core import (
+    get_openweather_onecall,
+    get_reverse_geocoding,
+)
 
 mcp = FastMCP("iran_wildfire")
 
@@ -60,6 +63,34 @@ async def get_nasa_frims_fires_in_iran(
     return "Fires detected by NASA FIRMS:\n\n" + "".join(
         [fire.to_human_readable(i) for i, fire in enumerate(response, 1)]
     )
+
+
+@mcp.tool()
+async def get_openweather_onecall_data(
+    latitude: float,
+    longitude: float,
+    api_key: Optional[str] = None,
+    exclude: Optional[str] = None,
+    units: str = "metric",
+    lang: str = "en",
+    timeout: int = 30,
+) -> str:
+    """
+    You can search weather forecast for 5 days with data every 3 hours by geographic coordinates.
+    All weather data can be obtained in JSON and XML formats.
+
+    Parameters:
+    latitude	required	Latitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API
+    longitude	required	Longitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API
+
+    """
+    response = get_openweather_onecall(
+        latitude=latitude,
+        longitude=longitude,
+        api_key=api_key,
+        timeout=timeout,
+    )
+    return response.to_human_readable()  # type: ignore
 
 
 def main():

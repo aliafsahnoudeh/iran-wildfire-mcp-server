@@ -16,6 +16,27 @@ OPENWEATHER_REVERSE_GEOCODING_URL = f"{OPENWEATHER_BASE_URL}/geo/1.0/reverse"
 load_dotenv()
 
 
+def _get_api_key(api_key: Optional[str] = None) -> str:
+    """Get API key from parameter or environment variable.
+
+    Args:
+        api_key: Optional API key to use
+
+    Returns:
+        str: The API key
+
+    Raises:
+        ValueError: If no API key is provided or found in environment
+    """
+    if api_key is None:
+        api_key = os.environ.get("OPEN_WEATHER_MAP_API_KEY")
+        if api_key is None:
+            raise ValueError(
+                "API key must be provided or set in OPEN_WEATHER_MAP_API_KEY environment variable"
+            )
+    return api_key
+
+
 # TODO: pass the full list of parameters to the function
 def get_openweather_onecall(
     latitude: float,
@@ -40,12 +61,7 @@ def get_openweather_onecall(
     Returns:
     ForecastResponse
     """
-    if api_key is None:
-        api_key = os.environ.get("OPEN_WEATHER_MAP_API_KEY")
-        if api_key is None:
-            raise ValueError(
-                "API key must be provided or set in OPEN_WEATHER_MAP_API_KEY environment variable"
-            )
+    api_key = _get_api_key(api_key)
 
     params: Dict[str, Any] = {
         "lat": latitude,
@@ -77,12 +93,7 @@ def get_current_air_pollution_data(
     Returns:
     AirPollutionResponse
     """
-    if api_key is None:
-        api_key = os.environ.get("OPEN_WEATHER_MAP_API_KEY")
-        if api_key is None:
-            raise ValueError(
-                "API key must be provided or set in OPEN_WEATHER_MAP_API_KEY environment variable"
-            )
+    api_key = _get_api_key(api_key)
 
     params: Dict[str, Any] = {
         "lat": latitude,
@@ -120,12 +131,7 @@ def get_historical_air_pollution_data(
     Returns:
     AirPollutionResponse
     """
-    if api_key is None:
-        api_key = os.environ.get("OPEN_WEATHER_MAP_API_KEY")
-        if api_key is None:
-            raise ValueError(
-                "API key must be provided or set in OPEN_WEATHER_MAP_API_KEY environment variable"
-            )
+    api_key = _get_api_key(api_key)
 
     params: Dict[str, Any] = {
         "lat": latitude,
@@ -164,12 +170,7 @@ def get_reverse_geocoding(
     ReverseGeocodingResponse
 
     """
-    if api_key is None:
-        api_key = os.environ.get("OPEN_WEATHER_MAP_API_KEY")
-        if api_key is None:
-            raise ValueError(
-                "API key must be provided or set in OPEN_WEATHER_MAP_API_KEY environment variable"
-            )
+    api_key = _get_api_key(api_key)
 
     params: Dict[str, Any] = {
         "lat": latitude,
