@@ -30,7 +30,7 @@ class RawFireData:
     frp: float  # Fire Radiative Power (MW)
     daynight: DayNight  # 'D' for day, 'N' for night detection
 
-    def to_human_readable(self, index) -> str:
+    def to_human_readable(self, index: int | None = None) -> str:
         """Convert fire data to a human-readable format."""
         # Parse acquisition time (HHMM format)
         time_str = str(self.acq_time).zfill(4)  # Ensure 4 digits
@@ -48,7 +48,7 @@ class RawFireData:
         temp_ti4_c = self.bright_ti4 - 273.15
         temp_ti5_c = self.bright_ti5 - 273.15
 
-        return f"""{index}.
+        return f"""{index if index is not None else ""}.
 Location: {self.latitude:.4f}°, {self.longitude:.4f}°
 Detection Time: {self.acq_date} at {hour}:{minute} UTC ({daynight_display})
 Satellite: {self.satellite} ({self.instrument})
@@ -61,5 +61,4 @@ Fire Characteristics:
   - Pixel Size: {self.scan:.3f}° × {self.track:.3f}°
 
 Data Version: {self.version}
-{"-" * 40}
 """

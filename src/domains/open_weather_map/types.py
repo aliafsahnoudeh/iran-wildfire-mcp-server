@@ -166,8 +166,6 @@ class ForecastResponse:
         output.append(
             f"5-Day Weather Forecast for {self.city.name}, {self.city.country}"
         )
-        output.append("=" * 70)
-
         for item in self.list:
             from datetime import datetime
 
@@ -178,7 +176,7 @@ class ForecastResponse:
             rain_volume = item.rain.three_h if item.rain else 0.0
             snow_volume = item.snow.three_h if item.snow else 0.0
 
-            output.append(f"\nTimestamp: {timestamp}")
+            output.append(f"Timestamp: {timestamp}")
             output.append(f"Weather: {weather_desc}")
             output.append(
                 f"Temperature: {item.main.temp}K (Feels like: {item.main.feels_like}K)"
@@ -190,7 +188,7 @@ class ForecastResponse:
             output.append(f"Precipitation Probability: {item.pop * 100}%")
             output.append(f"Rain Volume (last 3h): {rain_volume} mm")
             output.append(f"Snow Volume (last 3h): {snow_volume} mm")
-            output.append("-" * 70)
+            output.append("-" * 20)
 
         return "\n".join(output)
 
@@ -258,7 +256,6 @@ class AirPollutionResponse:
         output = []
         lon, lat = self.coord["lon"], self.coord["lat"]
         output.append(f"Air Pollution Data for Location: [{lat:.4f}°N, {lon:.4f}°E]")
-        output.append("=" * 70)
 
         for item in self.list:
             from datetime import datetime
@@ -266,7 +263,7 @@ class AirPollutionResponse:
             timestamp = datetime.fromtimestamp(item.dt).strftime("%Y-%m-%d %H:%M:%S")
             aqi_label = aqi_labels.get(item.main.aqi, "Unknown")
 
-            output.append(f"\nTimestamp: {timestamp}")
+            output.append(f"Timestamp: {timestamp}")
             output.append(f"Air Quality Index: {item.main.aqi} ({aqi_label})")
             output.append("\nPollutant Concentrations (μg/m³):")
             output.append(f"  CO (Carbon Monoxide):        {item.components.co:>10.2f}")
@@ -332,9 +329,8 @@ class ReverseGeocodingResponse:
         output = []
         for loc in response.locations:
             output.append(f"Location Name: {loc.name}")
-            output.append(f"  Country: {loc.country}")
+            output.append(f"Country: {loc.country}")
             if loc.state:
-                output.append(f"  State: {loc.state}")
-            output.append(f"  Coordinates: [{loc.lat:.4f}°N, {loc.lon:.4f}°E]")
-            output.append("-" * 40)
+                output.append(f"State: {loc.state}")
+            output.append(f" Coordinates: [{loc.lat:.4f}°N, {loc.lon:.4f}°E]")
         return "\n".join(output)

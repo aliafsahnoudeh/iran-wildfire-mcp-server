@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
@@ -11,6 +12,71 @@ from src.domains.open_weather_map.core import (
 )
 
 mcp = FastMCP("iran_wildfire")
+
+
+@mcp.tool()
+async def get_iran_wildfires_by_day(
+    date: Optional[str] = None,
+    frp: float = 10,
+    bright_ti4: float = 330,
+) -> str:
+    """
+    Returns fire detections inside Iran in one specific day combining all other available mcp tools.
+
+    """
+    response = get_fires_in_iran(
+        start_date=date,
+        end_date=date,
+        frp=frp,
+        bright_ti4=bright_ti4,
+    )
+
+    # Convert date string to datetime and calculate timestamps
+    date_obj = datetime.strptime(date, "%Y-%m-%d")
+    end_timestamp = int(date_obj.timestamp())
+    start_date_obj = date_obj - timedelta(days=7)
+    start_timestamp = int(start_date_obj.timestamp())
+
+    output = ["List of wildfires detected in Iran:\n"]
+
+    for i, fire in enumerate(response, 1):
+        # TODO test
+        if i > 5:
+            break
+        address = get_reverse_geocoding(
+            latitude=fire.latitude,
+            longitude=fire.longitude,
+        )
+        output.append(str(i) + ". Fire Detected:\n")
+        output.append(address.to_human_readable(address))  # type: ignore
+        output.append(20 * "=")
+        output.append("NASA FIRMS Data:")
+        output.append(fire.to_human_readable())  # type: ignore
+        output.append(20 * "=" + "\n")
+        output.append("OpenWeather OneCall Data:\n")
+        openweather_result = get_openweather_onecall(
+            latitude=fire.latitude,
+            longitude=fire.longitude,
+        )
+        output.append(openweather_result.to_human_readable())  # type: ignore
+        current_air_pollution = get_current_air_pollution_data(
+            latitude=fire.latitude,
+            longitude=fire.longitude,
+        )
+        output.append(20 * "-" + "")
+        output.append("Current Air Pollution Data:\n")
+        output.append(current_air_pollution.to_human_readable())  # type: ignore
+        output.append("\n\nHistorical Air Pollution Data (last 7 days):\n")
+
+        historical_air_pollution_data = get_historical_air_pollution_data(
+            latitude=fire.latitude,
+            longitude=fire.longitude,
+            start=start_timestamp,
+            end=end_timestamp,
+        )
+        output.append(historical_air_pollution_data.to_human_readable())  # type: ignore
+
+    return "\n".join(output)
 
 
 @mcp.tool()
