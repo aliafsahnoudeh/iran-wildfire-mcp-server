@@ -54,14 +54,15 @@ async def get_potential_wildfires(
         output.append("\n")
 
         output.append("NASA FIRMS Data:")
-        output.append(fire.to_human_readable())  # type: ignore
+        output.append(fire.to_human_readable())
+
+        output.append(location_details(fire.latitude, fire.longitude, date))
 
     output.append(20 * "=" + "\n")
     return "\n".join(output)
 
 
-@mcp.tool()
-async def location_details(latitude: float, longitude: float, date: str) -> str:
+def location_details(latitude: float, longitude: float, date: str) -> str:
     """
     Get detailed information about weather, air pollution, NDVI, FWI, and land cover for a specific location and date.
 
@@ -87,7 +88,7 @@ async def location_details(latitude: float, longitude: float, date: str) -> str:
     )
     output.append(openweather_result.to_human_readable())  # type: ignore
 
-    output.append(20 * "-" + "")
+    output.append(20 * "=" + "")
     output.append("Current Air Pollution Data:\n")
     current_air_pollution = get_current_air_pollution_data(
         latitude=latitude,
@@ -101,7 +102,8 @@ async def location_details(latitude: float, longitude: float, date: str) -> str:
         start=start_date_obj.date(),
         end=date_obj.date(),
     )
-    output.append(f"MODIS NDVI timeseries: {ndvi_timeseries.__str__()}")
+    output.append("MODIS NDVI timeseries:\n")
+    output.append(f"{ndvi_timeseries.__str__()}")
 
     fwi_timeseries = get_gfwed_fwi_timeseries(
         latitude=latitude,
@@ -109,7 +111,8 @@ async def location_details(latitude: float, longitude: float, date: str) -> str:
         start=start_date_obj.date(),
         end=date_obj.date(),
     )
-    output.append(f"GFWED FWI timeseries: {fwi_timeseries.__str__()}")
+    output.append("GFWED FWI timeseries:\n")
+    output.append(f"{fwi_timeseries.__str__()}")
 
     worldcover_class_2021 = get_worldcover_class(latitude=latitude, longitude=longitude)
 
@@ -118,7 +121,8 @@ async def location_details(latitude: float, longitude: float, date: str) -> str:
             f"WorldCover 2021 Land Cover Class: {worldcover_class_2021.__str__()}"
         )
 
-    output.append("\n\nHistorical Air Pollution Data (last 7 days):\n")
+    output.append(20 * "=" + "")
+    output.append("Historical Air Pollution Data (last 7 days):\n")
 
     historical_air_pollution_data = get_historical_air_pollution_data(
         latitude=latitude,
