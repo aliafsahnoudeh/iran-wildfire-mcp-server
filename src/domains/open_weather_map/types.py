@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -83,12 +82,12 @@ class ForecastItem:
     weather: list[Weather]
     clouds: Clouds
     wind: Wind
-    visibility: int
     pop: float
     sys: Sys
     dt_txt: str
-    rain: Optional[Rain] = None
-    snow: Optional[Snow] = None
+    visibility: int | None = None
+    rain: Rain | None = None
+    snow: Snow | None = None
 
 
 @dataclass
@@ -133,7 +132,7 @@ class ForecastResponse:
                 weather=[Weather(**w) for w in item["weather"]],
                 clouds=Clouds(**item["clouds"]),
                 wind=Wind(**item["wind"]),
-                visibility=item["visibility"],
+                visibility=item.get("visibility"),
                 pop=item["pop"],
                 sys=Sys(**item["sys"]),
                 dt_txt=item["dt_txt"],
@@ -184,7 +183,11 @@ class ForecastResponse:
             output.append(f"Humidity: {item.main.humidity}%")
             output.append(f"Wind: {item.wind.speed} m/s at {item.wind.deg}°")
             output.append(f"Cloudiness: {item.clouds.all}%")
-            output.append(f"Visibility: {item.visibility} meters")
+            output.append(
+                f"Visibility: {item.visibility} meters"
+                if item.visibility is not None
+                else "Visibility: N/A"
+            )
             output.append(f"Precipitation Probability: {item.pop * 100}%")
             output.append(f"Rain Volume (last 3h): {rain_volume} mm")
             output.append(f"Snow Volume (last 3h): {snow_volume} mm")
@@ -284,7 +287,7 @@ class AirPollutionResponse:
             output.append(
                 f"  NH₃ (Ammonia):               {item.components.nh3:>10.2f}"
             )
-            output.append("-" * 70)
+            output.append("-" * 20)
 
         return "\n".join(output)
 
@@ -297,8 +300,8 @@ class ReverseGeocodingLocation:
     lat: float
     lon: float
     country: str
-    state: Optional[str] = None
-    local_names: Optional[dict[str, str]] = None
+    state: str | None = None
+    local_names: dict[str, str] | None = None
 
 
 @dataclass
