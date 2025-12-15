@@ -21,14 +21,18 @@ mcp = FastMCP("iran_wildfire")
 
 
 @mcp.tool()
-async def get_iran_wildfires_by_day(
+async def get_potential_wildfires(
     date: Optional[str] = None,
     frp: float = 10,
     bright_ti4: float = 330,
 ) -> str:
     """
-    Returns fire detections inside Iran in one specific day combining all other available mcp tools.
+    Get potential wildfires in Iran for a specific date using NASA FIRMS data.
 
+    Parameters:
+    date (str): Date in YYYY-MM-DD format. If None, uses the current date.
+    frp (float): Fire Radiative Power threshold.
+    bright_ti4 (float): Brightness temperature threshold.
     """
     response = get_fires_in_iran(
         start_date=date,
@@ -36,6 +40,37 @@ async def get_iran_wildfires_by_day(
         frp=frp,
         bright_ti4=bright_ti4,
     )
+    output = [f"Fires detected by NASA FIRMS in Iran on {date}:\n\n"]
+    for i, fire in enumerate(response, 1):
+        latitude = fire.latitude
+        longitude = fire.longitude
+        output.append(20 * "=")
+        output.append(f"\nFire {i} Details:\n")
+        address = get_reverse_geocoding(
+            latitude=latitude,
+            longitude=longitude,
+        )
+        output.append(address.to_human_readable(address))  # type: ignore
+        output.append("\n")
+
+        output.append("NASA FIRMS Data:")
+        output.append(fire.to_human_readable())  # type: ignore
+
+    output.append(20 * "=" + "\n")
+    return "\n".join(output)
+
+
+@mcp.tool()
+async def location_details(latitude: float, longitude: float, date: str) -> str:
+    """
+    Get detailed information about weather, air pollution, NDVI, FWI, and land cover for a specific location and date.
+
+    Parameters:
+    latitude (float): Latitude of the location.
+    longitude (float): Longitude of the location.
+    date (str): Date in YYYY-MM-DD format.
+    """
+    output = [f"Detailed Information for ({latitude}, {longitude}) on {date}:\n"]
 
     # Convert date string to datetime and calculate timestamps
     date_obj = datetime.strptime(date, "%Y-%m-%d")
@@ -45,73 +80,53 @@ async def get_iran_wildfires_by_day(
 
     init_earth_engine()
 
-    output = ["List of wildfires detected in Iran:\n"]
+    output.append("OpenWeather OneCall Data:\n")
+    openweather_result = get_openweather_onecall(
+        latitude=latitude,
+        longitude=longitude,
+    )
+    output.append(openweather_result.to_human_readable())  # type: ignore
 
-    for i, fire in enumerate(response, 1):
-        # TODO test
-        if i > 5:
-            break
-        address = get_reverse_geocoding(
-            latitude=fire.latitude,
-            longitude=fire.longitude,
-        )
-        output.append(str(i) + ". Fire Detected:\n")
-        output.append(address.to_human_readable(address))  # type: ignore
-        output.append(20 * "=")
+    output.append(20 * "-" + "")
+    output.append("Current Air Pollution Data:\n")
+    current_air_pollution = get_current_air_pollution_data(
+        latitude=latitude,
+        longitude=longitude,
+    )
+    output.append(current_air_pollution.to_human_readable())  # type: ignore
 
-        output.append("NASA FIRMS Data:")
-        output.append(fire.to_human_readable())  # type: ignore
-        output.append(20 * "=" + "\n")
+    ndvi_timeseries = get_modis_ndvi_timeseries(
+        latitude=latitude,
+        longitude=longitude,
+        start=start_date_obj.date(),
+        end=date_obj.date(),
+    )
+    output.append(f"MODIS NDVI timeseries: {ndvi_timeseries.__str__()}")
 
-        output.append("OpenWeather OneCall Data:\n")
-        openweather_result = get_openweather_onecall(
-            latitude=fire.latitude,
-            longitude=fire.longitude,
-        )
-        output.append(openweather_result.to_human_readable())  # type: ignore
+    fwi_timeseries = get_gfwed_fwi_timeseries(
+        latitude=latitude,
+        longitude=longitude,
+        start=start_date_obj.date(),
+        end=date_obj.date(),
+    )
+    output.append(f"GFWED FWI timeseries: {fwi_timeseries.__str__()}")
 
-        output.append(20 * "-" + "")
-        output.append("Current Air Pollution Data:\n")
-        current_air_pollution = get_current_air_pollution_data(
-            latitude=fire.latitude,
-            longitude=fire.longitude,
-        )
-        output.append(current_air_pollution.to_human_readable())  # type: ignore
+    worldcover_class_2021 = get_worldcover_class(latitude=latitude, longitude=longitude)
 
-        ndvi_timeseries = get_modis_ndvi_timeseries(
-            latitude=fire.latitude,
-            longitude=fire.longitude,
-            start=start_date_obj.date(),
-            end=date_obj.date(),
-        )
-        output.append(f"MODIS NDVI timeseries: {ndvi_timeseries.__str__()}")
-
-        fwi_timeseries = get_gfwed_fwi_timeseries(
-            latitude=fire.latitude,
-            longitude=fire.longitude,
-            start=start_date_obj.date(),
-            end=date_obj.date(),
-        )
-        output.append(f"GFWED FWI timeseries: {fwi_timeseries.__str__()}")
-
-        worldcover_class_2021 = get_worldcover_class(
-            latitude=fire.latitude, longitude=fire.longitude
+    if worldcover_class_2021 is not None:
+        output.append(
+            f"WorldCover 2021 Land Cover Class: {worldcover_class_2021.__str__()}"
         )
 
-        if worldcover_class_2021 is not None:
-            output.append(
-                f"WorldCover 2021 Land Cover Class: {worldcover_class_2021.__str__()}"
-            )
+    output.append("\n\nHistorical Air Pollution Data (last 7 days):\n")
 
-        output.append("\n\nHistorical Air Pollution Data (last 7 days):\n")
-
-        historical_air_pollution_data = get_historical_air_pollution_data(
-            latitude=fire.latitude,
-            longitude=fire.longitude,
-            start=start_timestamp,
-            end=end_timestamp,
-        )
-        output.append(historical_air_pollution_data.to_human_readable())  # type: ignore
+    historical_air_pollution_data = get_historical_air_pollution_data(
+        latitude=latitude,
+        longitude=longitude,
+        start=start_timestamp,
+        end=end_timestamp,
+    )
+    output.append(historical_air_pollution_data.to_human_readable())  # type: ignore
 
     return "\n".join(output)
 
