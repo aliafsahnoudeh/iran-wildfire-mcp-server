@@ -40,6 +40,7 @@ async def get_potential_wildfires(
         frp=frp,
         bright_ti4=bright_ti4,
     )
+    date = date or datetime.utcnow().strftime("%Y-%m-%d")
     output = [f"Fires detected by NASA FIRMS in Iran on {date}:\n\n"]
     for i, fire in enumerate(response, 1):
         latitude = fire.latitude
