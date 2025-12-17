@@ -51,7 +51,7 @@ async def get_potential_wildfires(
             latitude=latitude,
             longitude=longitude,
         )
-        output.append(address.to_human_readable(address))  # type: ignore
+        output.append(address.to_human_readable())  # type: ignore
         output.append("\n")
 
         output.append("NASA FIRMS Data:")
