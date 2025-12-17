@@ -113,7 +113,7 @@ def get_fires_in_iran(
     if FIRE_DEV_MODE:
         logger.info(f"Detected {len(filtered)} fires within Iran above thresholds")
 
-    return [
+    fires = [
         RawFireData(
             latitude=row["latitude"],
             longitude=row["longitude"],
@@ -132,3 +132,4 @@ def get_fires_in_iran(
         )
         for _, row in filtered.iterrows()
     ]
+    return sorted(fires, key=lambda x: x.latitude)
