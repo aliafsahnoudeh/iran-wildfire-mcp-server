@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from src import (
     AddressAgent,
     AirPollutionAgent,
-    ForestAgent,
+    FireFuelAgent,
     LikelyFireAgent,
     WeatherForecastAgent,
 )
@@ -30,7 +30,7 @@ else:
 def main():
     # Initialize agents
     fire_agent = LikelyFireAgent()
-    forest_agent = ForestAgent()
+    fire_fuel_agent = FireFuelAgent()
     address_agent = AddressAgent()
     weather_agent = WeatherForecastAgent()
     air_pollution_agent = AirPollutionAgent()
@@ -49,7 +49,7 @@ def main():
 
             try:
                 # Check if location is forested using forest agent
-                forested = forest_agent.is_forest(lat, lon)
+                forested = fire_fuel_agent.is_fire_fuel(lat, lon)
                 logger.info(
                     f"Checked forested area for fire at ({lat}, {lon}): {forested}"
                 )

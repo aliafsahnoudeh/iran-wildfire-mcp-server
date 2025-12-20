@@ -2,7 +2,7 @@ from src.domains.google_earth_engine import get_worldcover_class, init_earth_eng
 from src.domains.overpass import is_forest
 
 
-class ForestAgent:
+class FireFuelAgent:
     """Agent to check if a location is within a forest."""
 
     _is_google_earth_engine_initialized = False
@@ -10,7 +10,7 @@ class ForestAgent:
     def __init__(self):
         pass
 
-    def is_forest(
+    def is_fire_fuel(
         self, latitude: float, longitude: float, search_radius: int = 1500
     ) -> bool:
         """Check if the given latitude and longitude are in a forest.

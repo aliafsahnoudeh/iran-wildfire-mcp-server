@@ -9,18 +9,18 @@ Main Components:
 - Types: Data models for API responses and domain entities
 
 Usage Example:
-    from src import LikelyFireAgent, ForestAgent, WeatherForecastAgent
+    from src import LikelyFireAgent, FireFuelAgent, WeatherForecastAgent
     from src.types import RawFireData, ForecastResponse
 
     # Initialize agents
     fire_agent = LikelyFireAgent(satellite_id="VIIRS")
-    forest_agent = ForestAgent()
+    fire_fuel_agent = FireFuelAgent()
     weather_agent = WeatherForecastAgent()
 
     # Use agents
     fires = fire_agent.fetch_likely_fires(start_date="2025-01-01", end_date="2025-01-02")
     for fire in fires:
-        if forest_agent.is_forest(fire.latitude, fire.longitude):
+        if fire_fuel_agent.is_fire_fuel(fire.latitude, fire.longitude):
             forecast = weather_agent.get_forecast(fire.latitude, fire.longitude)
 """
 
@@ -30,7 +30,7 @@ from . import types
 from .agents import (
     AddressAgent,
     AirPollutionAgent,
-    ForestAgent,
+    FireFuelAgent,
     LikelyFireAgent,
     WeatherForecastAgent,
 )
@@ -52,7 +52,7 @@ __all__ = [
     # Agents
     "AddressAgent",
     "AirPollutionAgent",
-    "ForestAgent",
+    "FireFuelAgent",
     "LikelyFireAgent",
     "WeatherForecastAgent",
     # NASA FIRMS Types
