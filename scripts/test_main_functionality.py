@@ -4,18 +4,18 @@ import sys
 import time
 from pathlib import Path
 
-from dotenv import load_dotenv
-
-# Add the project root to Python path
+# Must add path before other imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.domains.nasa_firms import get_fires_in_iran
-from src.domains.open_weather_map import (
-    get_current_air_pollution_data,
-    get_openweather_onecall,
-    get_reverse_geocoding,
+from dotenv import load_dotenv
+
+from src import (
+    AddressAgent,
+    AirPollutionAgent,
+    ForestAgent,
+    LikelyFireAgent,
+    WeatherForecastAgent,
 )
-from src.domains.overpass import is_forest
 
 load_dotenv()
 
@@ -28,9 +28,18 @@ else:
 
 
 def main():
+    # Initialize agents
+    fire_agent = LikelyFireAgent()
+    forest_agent = ForestAgent()
+    address_agent = AddressAgent()
+    weather_agent = WeatherForecastAgent()
+    air_pollution_agent = AirPollutionAgent()
+
     try:
         logger.info(f"Started at: {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime())}")
-        likely_fires = get_fires_in_iran(
+
+        # Fetch likely fires using the fire agent
+        likely_fires = fire_agent.fetch_likely_fires(
             start_date="2025-11-19", end_date="2025-11-19", frp=1, bright_ti4=50
         )
 
@@ -39,8 +48,8 @@ def main():
             lon = fire.longitude
 
             try:
-                # Check if location is forested (caching handled automatically)
-                forested = is_forest(lat, lon)
+                # Check if location is forested using forest agent
+                forested = forest_agent.is_forest(lat, lon)
                 logger.info(
                     f"Checked forested area for fire at ({lat}, {lon}): {forested}"
                 )
@@ -53,27 +62,34 @@ def main():
                 continue
 
             if forested:
-                output = [f"Fire ({lat}, {lon}):\n"]
-                address = get_reverse_geocoding(
+                output = [f"Fire ({lat}, {lon}):\\n"]
+
+                # Get address using address agent
+                address = address_agent.get_address(
                     latitude=fire.latitude,
                     longitude=fire.longitude,
                 )
                 output.append(address.to_human_readable())
-                openweather_result = get_openweather_onecall(
+
+                # Get weather forecast using weather agent
+                weather_forecast = weather_agent.get_forecast(
                     latitude=fire.latitude,
                     longitude=fire.longitude,
                 )
-                output.append(openweather_result.to_human_readable())
-                current_air_pollution = get_current_air_pollution_data(
+                output.append(weather_forecast.to_human_readable())
+
+                # Get current air pollution using air pollution agent
+                current_air_pollution = air_pollution_agent.fetch_current_air_pollution(
                     latitude=fire.latitude,
                     longitude=fire.longitude,
                 )
                 output.append(current_air_pollution.to_human_readable())
-                # save to a text file with date and time in filename
+
+                # Save to a text file with date and time in filename
                 timestamp = fire.acq_date + "_" + str(fire.acq_time)
                 output_filename = f"output/fire_{lat}_{lon}_{timestamp}.txt"
                 with open(output_filename, "w") as f:
-                    f.write("\n\n".join(output))
+                    f.write("\\n\\n".join(output))
     except Exception as e:
         logger.error(f"Error in main functionality test: {e}")
     finally:
