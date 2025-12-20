@@ -29,6 +29,7 @@ else:
 
 def main():
     try:
+        logger.info(f"Started at: {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime())}")
         likely_fires = get_fires_in_iran(
             start_date="2025-11-19", end_date="2025-11-19", frp=1, bright_ti4=50
         )
@@ -75,6 +76,9 @@ def main():
                     f.write("\n\n".join(output))
     except Exception as e:
         logger.error(f"Error in main functionality test: {e}")
+    finally:
+        logger.info(f"Finished at: {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime())}")
+        logger.info(f"Duration: {time.perf_counter():.2f} seconds")
 
 
 if __name__ == "__main__":

@@ -91,56 +91,129 @@ def _query_overpass_api(
     out tags center;
     """
 
+    # Fuel features (vegetation that can carry fire)
+    fuel_query = f"""
+      nwr(around:{search_radius},{lat},{lon})["natural"="wood"];
+      nwr(around:{search_radius},{lat},{lon})["landuse"="forest"];
+      nwr(around:{search_radius},{lat},{lon})["natural"="scrub"];
+      nwr(around:{search_radius},{lat},{lon})["natural"="grassland"];
+      nwr(around:{search_radius},{lat},{lon})["landcover"="trees"];
+      nwr(around:{search_radius},{lat},{lon})["landcover"="grass"];
+    """
+
+    # Clear non-fuel / misleading features (water, bare ground, dense built-up)
+    exclude_query = f"""
+      nwr(around:{search_radius},{lat},{lon})["natural"="water"];
+      nwr(around:{search_radius},{lat},{lon})["waterway"];
+      nwr(around:{search_radius},{lat},{lon})["natural"="bare_rock"];
+      nwr(around:{search_radius},{lat},{lon})["natural"="sand"];
+      nwr(around:{search_radius},{lat},{lon})["landuse"~"^(residential|commercial|industrial|construction|quarry)$"];
+      nwr(around:{search_radius},{lat},{lon})["building"];
+      nwr(around:{search_radius},{lat},{lon})["highway"];
+    """
+
+    query = f"""
+    [out:json][timeout:25];
+    (
+      {fuel_query}
+      {exclude_query}
+    );
+    out tags qt;
+    """
+
     url = "https://overpass-api.de/api/interpreter"
     headers = {"User-Agent": "Iran-Wildfire-MCP-Server/1.0"}
 
     for attempt in range(max_retries):
         try:
-            logger.debug(
-                f"Querying Overpass API for ({lat}, {lon}), attempt {attempt + 1}"
-            )
             r = requests.post(
                 url, data={"data": query}, headers=headers, timeout=timeout
             )
+            r.raise_for_status()
+            data = r.json()
+            elements = data.get("elements", [])
 
-            # Check if request was successful
-            if r.status_code != 200:
-                logger.error(
-                    f"Overpass API returned status {r.status_code}: {r.text[:200]}"
-                )
-                raise Exception(f"Overpass API error: {r.status_code}")
+            # --- scoring ---
+            fuel_score = 0
+            exclude_score = 0
 
-            # Try to parse JSON
-            try:
-                data = r.json()
-            except requests.exceptions.JSONDecodeError:
-                logger.error(f"Failed to parse JSON. Response: {r.text[:200]}")
-                raise Exception("Invalid JSON response from Overpass API")
+            fuel_hits = {
+                "wood": 0,
+                "forest": 0,
+                "scrub": 0,
+                "grassland": 0,
+                "trees": 0,
+                "grass": 0,
+            }
+            exclude_hits = {"water": 0, "bare": 0, "built": 0, "roads": 0}
 
-            element_count = len(data["elements"])
-            is_forest = element_count > 0
+            for el in elements:
+                tags = el.get("tags", {})
+                natural = tags.get("natural")
+                landuse = tags.get("landuse")
+                landcover = tags.get("landcover")
 
-            logger.debug(
-                f"Overpass API query for ({lat}, {lon}): "
-                f"is_forest={is_forest}, elements={element_count}"
+                # --- fuel ---
+                if natural == "wood":
+                    fuel_score += 4
+                    fuel_hits["wood"] += 1
+                elif landuse == "forest":
+                    fuel_score += 4
+                    fuel_hits["forest"] += 1
+                elif natural == "scrub":
+                    fuel_score += 3
+                    fuel_hits["scrub"] += 1
+                elif natural == "grassland":
+                    fuel_score += 2
+                    fuel_hits["grassland"] += 1
+                elif landcover == "trees":
+                    fuel_score += 3
+                    fuel_hits["trees"] += 1
+                elif landcover == "grass":
+                    fuel_score += 1
+                    fuel_hits["grass"] += 1
+
+                # --- exclusions ---
+                if natural == "water" or "waterway" in tags:
+                    exclude_score += 6
+                    exclude_hits["water"] += 1
+                if natural in ("bare_rock", "sand"):
+                    exclude_score += 4
+                    exclude_hits["bare"] += 1
+                if "building" in tags or landuse in (
+                    "residential",
+                    "commercial",
+                    "industrial",
+                    "construction",
+                    "quarry",
+                ):
+                    exclude_score += 3
+                    exclude_hits["built"] += 1
+                if "highway" in tags:
+                    exclude_score += 1
+                    exclude_hits["roads"] += 1
+
+            # Decision:
+            # - require some fuel signal
+            # - if exclusions dominate, return False
+            wildfire_fuel_likely = (fuel_score >= 4) and (
+                exclude_score <= fuel_score + 2
             )
 
-            return is_forest, element_count
+            debug = {
+                "fuel_score": fuel_score,
+                "exclude_score": exclude_score,
+                "fuel_hits": fuel_hits,
+                "exclude_hits": exclude_hits,
+                "elements": len(elements),
+                "radius_m": search_radius,
+            }
+            return wildfire_fuel_likely, debug
 
-        except Exception as e:
+        except Exception:
             if attempt < max_retries - 1:
-                # Exponential backoff: 2, 4, 8, 16 seconds
-                wait_time = 2 ** (attempt + 1)
-                logger.warning(
-                    f"Retry {attempt + 1}/{max_retries} - Error querying Overpass API "
-                    f"for ({lat}, {lon}): {e}. Waiting {wait_time}s..."
-                )
-                time.sleep(wait_time)
+                time.sleep(2 ** (attempt + 1))
             else:
-                logger.error(
-                    f"Failed to query Overpass API for ({lat}, {lon}) "
-                    f"after {max_retries} attempts: {e}"
-                )
                 raise
 
 
@@ -149,6 +222,7 @@ def is_forest(
     lon: float,
     grid_precision: float = 0.001,
     search_radius: int = 1500,
+    use_cache: bool = False,
 ) -> bool:
     """Check if a location is forested.
 
@@ -171,51 +245,55 @@ def is_forest(
     Raises:
         Exception: If Overpass API query fails after all retries
     """
-    # Initialize cache on first call
-    _initialize_cache()
 
-    config = CacheConfig(
-        grid_precision=grid_precision,
-        search_radius=search_radius,
-    )
+    if use_cache:
+        logger.warning("Using cache.")
+        # Initialize cache on first call
+        _initialize_cache()
 
-    # Generate cache key
-    cache_key = config.get_cache_key(lat, lon)
-
-    # Check if we have a cache entry
-    if cache_key in _CACHE:
-        entry = _CACHE[cache_key]
-        logger.info(
-            f"Cache HIT for ({lat}, {lon}) -> grid ({entry.grid_lat}, {entry.grid_lon}): "
-            f"is_forest={entry.is_forest}"
+        config = CacheConfig(
+            grid_precision=grid_precision,
+            search_radius=search_radius,
         )
-        return entry.is_forest
-    else:
-        logger.info(f"Cache MISS for ({lat}, {lon})")
+
+        # Generate cache key
+        cache_key = config.get_cache_key(lat, lon)
+
+        # Check if we have a cache entry
+        if cache_key in _CACHE:
+            entry = _CACHE[cache_key]
+            logger.info(
+                f"Cache HIT for ({lat}, {lon}) -> grid ({entry.grid_lat}, {entry.grid_lon}): "
+                f"is_forest={entry.is_forest}"
+            )
+            return entry.is_forest
+        else:
+            logger.info(f"No cache for ({lat}, {lon})")
 
     # Query Overpass API
     is_forest_result, element_count = _query_overpass_api(lat, lon, search_radius)
 
-    # Update cache in memory
-    grid_lat = config.quantize_coordinate(lat)
-    grid_lon = config.quantize_coordinate(lon)
-    entry = CacheEntry(
-        grid_lat=grid_lat,
-        grid_lon=grid_lon,
-        is_forest=is_forest_result,
-        last_checked=datetime.now().isoformat(),
-        search_radius=search_radius,
-        element_count=element_count,
-    )
-    _CACHE[cache_key] = entry
+    if use_cache:
+        # Update cache in memory
+        grid_lat = config.quantize_coordinate(lat)
+        grid_lon = config.quantize_coordinate(lon)
+        entry = CacheEntry(
+            grid_lat=grid_lat,
+            grid_lon=grid_lon,
+            is_forest=is_forest_result,
+            last_checked=datetime.now().isoformat(),
+            search_radius=search_radius,
+            element_count=element_count,
+        )
+        _CACHE[cache_key] = entry
 
-    # Save to disk
-    _save_cache_to_disk()
+        # Save to disk
+        _save_cache_to_disk()
 
-    logger.info(
-        f"Updated cache for ({lat}, {lon}) -> grid ({grid_lat}, {grid_lon}): "
-        f"is_forest={is_forest_result}"
-    )
+        logger.info(
+            f"Updated cache for ({lat}, {lon}) -> grid ({grid_lat}, {grid_lon}): "
+            f"is_forest={is_forest_result}"
+        )
 
     return is_forest_result
 
