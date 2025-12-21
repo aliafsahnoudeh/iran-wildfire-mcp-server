@@ -62,7 +62,7 @@ class CacheEntry:
     Attributes:
         grid_lat: Quantized latitude for grid cell
         grid_lon: Quantized longitude for grid cell
-        is_forest: Whether the location is forested
+        is_fire_fuel: Whether the location is fire fuel
         last_checked: ISO timestamp of when the check was performed
         search_radius: Radius used for the forest search
         element_count: Number of OSM elements found (for debugging)
@@ -70,7 +70,7 @@ class CacheEntry:
 
     grid_lat: float
     grid_lon: float
-    is_forest: bool
+    is_fire_fuel: bool
     last_checked: str
     search_radius: int
     element_count: int = 0
@@ -88,7 +88,7 @@ class CacheEntry:
         return cls(
             grid_lat=data["grid_lat"],
             grid_lon=data["grid_lon"],
-            is_forest=data["is_forest"],
+            is_fire_fuel=data["is_fire_fuel"],
             last_checked=data["last_checked"],
             search_radius=data["search_radius"],
             element_count=data.get("element_count", 0),
@@ -103,7 +103,7 @@ class CacheEntry:
         return {
             "grid_lat": self.grid_lat,
             "grid_lon": self.grid_lon,
-            "is_forest": self.is_forest,
+            "is_fire_fuel": self.is_fire_fuel,
             "last_checked": self.last_checked,
             "search_radius": self.search_radius,
             "element_count": self.element_count,

@@ -76,21 +76,11 @@ def _query_overpass_api(
         max_retries: Maximum number of retry attempts
 
     Returns:
-        Tuple of (is_forest, element_count)
+        Tuple of (is_fire_fuel, element_count)
 
     Raises:
         Exception: If API call fails after all retries
     """
-    query = f"""
-    [out:json][timeout:25];
-    (
-    nwr(around:{search_radius},{lat},{lon})["natural"="wood"];
-    nwr(around:{search_radius},{lat},{lon})["landuse"="forest"];
-    nwr(around:{search_radius},{lat},{lon})["landcover"="trees"];
-    );
-    out tags center;
-    """
-
     # Fuel features (vegetation that can carry fire)
     fuel_query = f"""
       nwr(around:{search_radius},{lat},{lon})["natural"="wood"];
@@ -126,11 +116,20 @@ def _query_overpass_api(
 
     for attempt in range(max_retries):
         try:
+            logger.info(
+                "Querying Overpass API for lat=%s lon=%s radius_m=%s (attempt %s/%s)",
+                lat,
+                lon,
+                search_radius,
+                attempt + 1,
+                max_retries,
+            )
             r = requests.post(
                 url, data={"data": query}, headers=headers, timeout=timeout
             )
             r.raise_for_status()
             data = r.json()
+            logger.info("Overpass API raw response: %s", data)
             elements = data.get("elements", [])
 
             # --- scoring ---
@@ -208,7 +207,8 @@ def _query_overpass_api(
                 "elements": len(elements),
                 "radius_m": search_radius,
             }
-            return wildfire_fuel_likely, debug
+            logger.debug("Overpass scoring debug: %s", debug)
+            return wildfire_fuel_likely, len(elements)
 
         except Exception:
             if attempt < max_retries - 1:
@@ -217,14 +217,14 @@ def _query_overpass_api(
                 raise
 
 
-def is_forest(
+def is_fire_fuel(
     lat: float,
     lon: float,
     grid_precision: float = 0.001,
     search_radius: int = 1500,
     use_cache: bool = False,
 ) -> bool:
-    """Check if a location is forested.
+    """Check if a location is fire fuel.
 
     Conservative caching strategy optimized for wildfire detection accuracy:
     - Fine grid precision (0.001° ≈ 111m) minimizes quantization errors
@@ -264,9 +264,9 @@ def is_forest(
             entry = _CACHE[cache_key]
             logger.info(
                 f"Cache HIT for ({lat}, {lon}) -> grid ({entry.grid_lat}, {entry.grid_lon}): "
-                f"is_forest={entry.is_forest}"
+                f"is_fire_fuel={entry.is_fire_fuel}"
             )
-            return entry.is_forest
+            return entry.is_fire_fuel
         else:
             logger.info(f"No cache for ({lat}, {lon})")
 
@@ -280,7 +280,7 @@ def is_forest(
         entry = CacheEntry(
             grid_lat=grid_lat,
             grid_lon=grid_lon,
-            is_forest=is_forest_result,
+            is_fire_fuel=is_fire_fuel_result,
             last_checked=datetime.now().isoformat(),
             search_radius=search_radius,
             element_count=element_count,
@@ -292,10 +292,10 @@ def is_forest(
 
         logger.info(
             f"Updated cache for ({lat}, {lon}) -> grid ({grid_lat}, {grid_lon}): "
-            f"is_forest={is_forest_result}"
+            f"is_fire_fuel={is_fire_fuel_result}"
         )
 
-    return is_forest_result
+    return is_fire_fuel_result
 
 
 def refresh_cache(
@@ -328,7 +328,7 @@ def refresh_cache(
 
         try:
             # Query Overpass API
-            is_forest, element_count = _query_overpass_api(
+            is_fire_fuel, element_count = _query_overpass_api(
                 entry.grid_lat,
                 entry.grid_lon,
                 search_radius,
@@ -338,7 +338,7 @@ def refresh_cache(
             _CACHE[cache_key] = CacheEntry(
                 grid_lat=entry.grid_lat,
                 grid_lon=entry.grid_lon,
-                is_forest=is_forest,
+                is_fire_fuel=is_fire_fuel,
                 last_checked=datetime.now().isoformat(),
                 search_radius=search_radius,
                 element_count=element_count,
@@ -347,7 +347,7 @@ def refresh_cache(
             stats["updated"] += 1
             logger.info(
                 f"Updated cache entry for grid ({entry.grid_lat}, {entry.grid_lon}): "
-                f"is_forest={is_forest}"
+                f"is_fire_fuel={is_fire_fuel}"
             )
 
             # Delay to respect rate limits
@@ -389,7 +389,7 @@ def get_cache_stats() -> dict[str, int | float]:
             "average_age_days": 0.0,
         }
 
-    forest_count = sum(1 for entry in _CACHE.values() if entry.is_forest)
+    forest_count = sum(1 for entry in _CACHE.values() if entry.is_fire_fuel)
 
     # Calculate average age
     now = datetime.now()

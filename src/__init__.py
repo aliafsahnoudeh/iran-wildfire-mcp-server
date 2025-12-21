@@ -26,7 +26,6 @@ Usage Example:
 
 # Export all agents
 # Make types available as a submodule
-from . import types
 from .agents import (
     AddressAgent,
     AirPollutionAgent,

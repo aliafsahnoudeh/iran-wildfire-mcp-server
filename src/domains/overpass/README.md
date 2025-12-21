@@ -9,6 +9,7 @@ The Overpass API allows querying OpenStreetMap for geographic features. This imp
 ### Forest Detection
 
 **Checks if a location is forested** by searching for OSM features with tags:
+
 - `natural=wood`
 - `landuse=forest`
 - `landcover=trees`
@@ -20,12 +21,13 @@ The Overpass API allows querying OpenStreetMap for geographic features. This imp
 1. **Fine grid precision** (0.001° ≈ 111m at 30° latitude)
    - Minimizes location quantization errors
    - Ensures fire locations aren't shifted too far from actual coordinates
-   
 2. **Large search radius** (1500m instead of 800m)
+
    - Provides safety margin even with coordinate quantization
    - Ensures forests are detected even near grid cell boundaries
 
 3. **Manual cache updates**:
+
    - Cache never expires automatically
    - Call `refresh_cache()` manually when you need fresh data
    - Gives you full control over when to update cached forest information
@@ -37,16 +39,16 @@ The Overpass API allows querying OpenStreetMap for geographic features. This imp
 ### Basic Forest Check
 
 ```python
-from src.domains.overpass import is_forest
+from src.domains.overpass import is_fire_fuel
 
-# Check if location is forested (uses conservative defaults)
-is_forested = is_forest(
+# Check if location is fire fuel (uses conservative defaults)
+is_fire_fuel_result = is_fire_fuel(
     lat=35.6892,
     lon=51.3890
 )
 
 # Custom configuration (not recommended unless you have specific needs)
-is_forested = is_forest(
+is_fire_fuel_result = is_fire_fuel(
     lat=35.6892,
     lon=51.3890,
     grid_precision=0.001,     # ~111m grid cells (default)
@@ -71,6 +73,7 @@ stats = refresh_cache(
 ```
 
 **When to refresh cache:**
+
 - Before wildfire season starts
 - After major events that change forest coverage (fires, logging)
 - Periodically (weekly/monthly depending on your accuracy needs)
@@ -83,11 +86,13 @@ stats = refresh_cache(
 **These defaults prioritize accuracy over performance:**
 
 - **Grid Precision: 0.001°** (~111m at 30° latitude)
+
   - Fine granularity minimizes quantization errors
   - Fire at 35.6892° uses different cache than 35.6902°
   - ⚠️ Larger cache size but critical for accuracy
 
 - **Search Radius: 1500m**
+
   - Large radius provides safety margin
   - Ensures forest detection even with coordinate quantization
   - Captures forests near grid cell boundaries
@@ -111,7 +116,7 @@ You can adjust these parameters if you have specific needs:
 
 ```python
 # Example: Coarser grid (NOT recommended for wildfire detection)
-is_forested = is_forest(
+is_fire_fuel_result = is_fire_fuel(
     lat=35.6892,
     lon=51.3890,
     grid_precision=0.01,      # Coarser ~1km grid
@@ -124,13 +129,15 @@ is_forested = is_forest(
 ## Cache Storage
 
 Cache is stored in JSON format at:
+
 ```
 output/overpass_cache.json
 ```
 
 Each entry contains:
+
 - `grid_lat`, `grid_lon`: Quantized coordinates
-- `is_forest`: Boolean result
+- `is_fire_fuel`: Boolean result
 - `last_checked`: ISO timestamp (informational only, not used for expiration)
 - `search_radius`: Radius used for check
 - `element_count`: Number of OSM elements found (for debugging)
@@ -138,6 +145,7 @@ Each entry contains:
 ## Rate Limiting
 
 The Overpass API has rate limits. This implementation:
+
 - Adds delays between successive calls (default 3 seconds)
 - Uses exponential backoff for retries
 - Maximum 5 retry attempts per location
@@ -168,12 +176,14 @@ out tags center;
 ### Current Design (Conservative)
 
 ✅ **Prioritizes Accuracy**:
+
 - Fine grid (111m) catches all fire locations accurately
 - Large radius (1500m) ensures forest detection
 - Manual refresh gives you control over data freshness
 - **Result**: Minimal risk of missing forest fires
 
 ⚠️ **Performance Impact**:
+
 - Larger cache file size (~10x more entries than 1km grid)
 - All API calls on cache miss (no automatic refresh)
 - Slightly slower cache lookups (more entries)
@@ -181,6 +191,7 @@ out tags center;
 ### Why This Trade-off Matters for Wildfire Detection
 
 **Scenario: Fire near forest edge**
+
 - **Coarse grid (0.01° = 1km)**: Fire at 35.6892° quantized to 35.69°
   - Could be 500m+ from actual location
   - Might miss forest if near edge
@@ -193,20 +204,23 @@ out tags center;
 ## Workflow Recommendations
 
 ### Initial Setup
+
 ```python
 # First run - builds cache for your region
 for fire in fires:
-    is_forested = is_forest(fire.lat, fire.lon)
+    is_fire_fuel_result = is_fire_fuel(fire.lat, fire.lon)
     # Cache builds automatically on first check
 ```
 
 ### Regular Maintenance
+
 ```python
 # Run weekly/monthly to keep cache fresh
 refresh_cache()
 ```
 
 ### Pre-Season Preparation
+
 ```python
 # Before wildfire season, refresh all cached data
 stats = refresh_cache()

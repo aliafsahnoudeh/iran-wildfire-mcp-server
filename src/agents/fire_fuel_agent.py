@@ -1,5 +1,5 @@
 from src.domains.google_earth_engine import get_worldcover_class, init_earth_engine
-from src.domains.overpass import is_forest
+from src.domains.overpass import is_fire_fuel
 
 
 class FireFuelAgent:
@@ -22,7 +22,7 @@ class FireFuelAgent:
         Returns:
             bool: True if the location is in a forest, False otherwise.
         """
-        return is_forest(lat=latitude, lon=longitude, search_radius=search_radius)
+        return is_fire_fuel(lat=latitude, lon=longitude, search_radius=search_radius)
 
     def get_worldcover_class(
         self, latitude: float, longitude: float, scale: int = 10
