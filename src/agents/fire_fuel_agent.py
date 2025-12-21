@@ -1,5 +1,5 @@
 from src.domains.google_earth_engine import get_worldcover_class, init_earth_engine
-from src.domains.overpass import is_fire_fuel
+from src.domains.planetary_computer import is_wildfire_fuel_potential
 
 
 class FireFuelAgent:
@@ -10,19 +10,17 @@ class FireFuelAgent:
     def __init__(self):
         pass
 
-    def is_fire_fuel(
-        self, latitude: float, longitude: float, search_radius: int = 1500
-    ) -> bool:
-        """Check if the given latitude and longitude are in a forest.
+    def is_fire_fuel(self, latitude: float, longitude: float) -> bool:
+        """Check if the given latitude and longitude are in a potential wildfire fuel area.
 
         Args:
             latitude (float): Latitude of the location.
             longitude (float): Longitude of the location.
-            search_radius (int): Search radius in meters.
         Returns:
-            bool: True if the location is in a forest, False otherwise.
+            bool: True if the location is in a potential wildfire fuel area, False otherwise.
         """
-        return is_fire_fuel(lat=latitude, lon=longitude, search_radius=search_radius)
+        fuel_possible, _ = is_wildfire_fuel_potential(lat=latitude, lon=longitude)
+        return fuel_possible
 
     def get_worldcover_class(
         self, latitude: float, longitude: float, scale: int = 10

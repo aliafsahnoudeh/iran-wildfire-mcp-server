@@ -132,4 +132,4 @@ def get_fires_in_iran(
         )
         for _, row in filtered.iterrows()
     ]
-    return sorted(fires, key=lambda x: x.latitude)
+    return sorted(fires, key=lambda x: x.latitude, reverse=True)
