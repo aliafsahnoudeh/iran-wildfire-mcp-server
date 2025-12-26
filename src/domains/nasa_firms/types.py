@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum
 
+from pydantic import BaseModel
+
 
 class DayNight(str, Enum):
     DAY = "D"
@@ -13,24 +15,17 @@ class Confidence(str, Enum):
     HIGH = "h"
 
 
-class BoundingBox:
+class BoundingBox(BaseModel):
     """Geographical bounding box defined by min and max latitudes and longitudes."""
 
-    def __init__(
-        self,
-        min_latitude: float,
-        max_latitude: float,
-        min_longitude: float,
-        max_longitude: float,
-    ):
-        self.min_latitude = min_latitude
-        self.max_latitude = max_latitude
-        self.min_longitude = min_longitude
-        self.max_longitude = max_longitude
+    min_latitude: float
+    max_latitude: float
+    min_longitude: float
+    max_longitude: float
 
     def to_string(self) -> str:
         """Convert bounding box to string format required by NASA FIRMS API."""
-        return f"{self.min_latitude},{self.min_longitude},{self.max_latitude},{self.max_longitude}"
+        return f"{self.min_longitude},{self.min_latitude},{self.max_longitude},{self.max_latitude}"
 
 
 @dataclass

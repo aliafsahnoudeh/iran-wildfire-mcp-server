@@ -2,7 +2,7 @@ from datetime import datetime
 
 from mcp.server.fastmcp import FastMCP
 
-from .src.agents import (
+from src import (
     AddressAgent,
     AirPollutionAgent,
     BoundingBox,

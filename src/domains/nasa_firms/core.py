@@ -20,6 +20,15 @@ if FIRE_DEV_MODE:
         format="[%(levelname)s] %(message)s",
     )
 
+
+def _build_bbox() -> str:
+    """Return bbox string like 'lon_min,lat_min,lon_max,lat_max'."""
+    return (
+        f"{IRAN_BBOX['lon_min']},{IRAN_BBOX['lat_min']},"
+        f"{IRAN_BBOX['lon_max']},{IRAN_BBOX['lat_max']}"
+    )
+
+
 # Larger bbox around Iran
 IRAN_BBOX = BoundingBox(
     min_latitude=23.69,
@@ -75,7 +84,7 @@ def get_fires(
     frp: float = 10,
     bright_ti4: float = 330,
     in_iran: bool = False,
-    bounding_box: BoundingBox | None = IRAN_BBOX,
+    bounding_box: BoundingBox | None = None,
 ) -> list[RawFireData]:
     """
     Query NASA FIRMS for fire detections.
@@ -91,6 +100,8 @@ def get_fires(
     Returns a list of RawFireData with filtered fires.
     """
     key = _resolve_api_key(api_key)
+    if bounding_box is None or in_iran:
+        bounding_box = IRAN_BBOX
     url = _build_firms_url(key, bounding_box.to_string(), start_date, end_date)
 
     if FIRE_DEV_MODE:
@@ -102,7 +113,7 @@ def get_fires(
         logger.info(f"Retrieved {len(df)} raw fire records")
 
     # Apply filtering
-    if in_iran:
+    if in_iran or bounding_box == IRAN_BBOX:
         mask = (
             df.apply(lambda r: is_in_iran(r["latitude"], r["longitude"]), axis=1)
             & (df["frp"] > frp)
