@@ -13,6 +13,26 @@ class Confidence(str, Enum):
     HIGH = "h"
 
 
+class BoundingBox:
+    """Geographical bounding box defined by min and max latitudes and longitudes."""
+
+    def __init__(
+        self,
+        min_latitude: float,
+        max_latitude: float,
+        min_longitude: float,
+        max_longitude: float,
+    ):
+        self.min_latitude = min_latitude
+        self.max_latitude = max_latitude
+        self.min_longitude = min_longitude
+        self.max_longitude = max_longitude
+
+    def to_string(self) -> str:
+        """Convert bounding box to string format required by NASA FIRMS API."""
+        return f"{self.min_latitude},{self.min_longitude},{self.max_latitude},{self.max_longitude}"
+
+
 @dataclass
 class RawFireData:
     latitude: float  # Center latitude of the detected fire pixel

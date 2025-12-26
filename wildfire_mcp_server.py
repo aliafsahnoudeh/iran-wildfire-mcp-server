@@ -1,17 +1,17 @@
 from datetime import datetime
-from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
 
-from src import (
+from .src.agents import (
     AddressAgent,
     AirPollutionAgent,
+    BoundingBox,
     FireFuelAgent,
     LikelyFireAgent,
     WeatherForecastAgent,
 )
 
-mcp = FastMCP("iran_wildfire")
+mcp = FastMCP("wildfire_mcp_server")
 
 
 fire_agent = LikelyFireAgent()
@@ -23,24 +23,30 @@ air_pollution_agent = AirPollutionAgent()
 
 @mcp.tool()
 async def get_potential_wildfires(
-    date: Optional[str] = None,
+    date: str | None = None,
     frp: float = 1,
     bright_ti4: float = 50,
+    in_iran: bool = False,
+    bounding_box: BoundingBox | None = None,
 ) -> str:
     """
     Get potential wildfires in Iran for a specific date using NASA FIRMS data.
     This function is a starting point for further analysis of detected fires.
 
     Parameters:
-    date (str): Date in YYYY-MM-DD format. If None, uses the current date.
-    frp (float): Fire Radiative Power threshold.
-    bright_ti4 (float): Brightness temperature threshold.
+        date (str): Date in YYYY-MM-DD format. If None, uses the current date.
+        frp (float): Fire Radiative Power threshold.
+        bright_ti4 (float): Brightness temperature threshold.
+        in_iran: If True, only returns fires within Iran's borders. In case of passing it True, leave the bounding_box as None.
+        bounding_box: Custom bounding box to limit the search area
     """
     response = fire_agent.fetch_likely_fires(
         start_date=date,
         end_date=date,
         frp=frp,
         bright_ti4=bright_ti4,
+        in_iran=in_iran,
+        bounding_box=bounding_box,
     )
     date = date or datetime.utcnow().strftime("%Y-%m-%d")
     output = [f"Fires detected by NASA FIRMS in Iran on {date}:\n\n"]

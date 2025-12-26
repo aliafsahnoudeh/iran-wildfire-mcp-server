@@ -33,7 +33,7 @@ def is_fire_fuel(lat, lon, search_radius=1500, timeout=60) -> bool:
     """
 
     url = "https://overpass-api.de/api/interpreter"
-    headers = {"User-Agent": "Iran-Wildfire-MCP-Server/1.0"}
+    headers = {"User-Agent": "Wildfire-MCP-Server/1.0"}
 
     r = requests.post(url, data={"data": query}, headers=headers, timeout=timeout)
     r.raise_for_status()

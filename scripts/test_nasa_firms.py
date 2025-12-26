@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 # Add the project root to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.domains.nasa_firms import get_fires_in_iran
+from src.domains.nasa_firms import get_fires
 
 load_dotenv()
 
@@ -23,7 +23,7 @@ else:
     logger.setLevel(logging.WARNING)
 
 
-likely_fires = get_fires_in_iran(
+likely_fires = get_fires(
     start_date="2025-11-19", end_date="2025-11-19", frp=1, bright_ti4=50
 )
 
@@ -33,7 +33,7 @@ output_filename = f"output/nasa_firms_fires_{timestamp}.txt"
 
 # save the results to a text file as a table and put it in /output directory
 with open(output_filename, "w") as f:
-    f.write("Fires in Iran:\n")
+    f.write("List of Fires:\n")
     f.write("Latitude\tLongitude\tBrightness (TI4)\tFRP (MW)\tDate\tTime\n")
     for fire in likely_fires:
         f.write(

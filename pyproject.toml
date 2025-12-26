@@ -1,7 +1,7 @@
 [project]
-name = "iran-wildfire-mcp-server"
+name = "wildfire-mcp-server"
 version = "0.1.0"
-description = "MCP server for Iran Wildfire Detection"
+description = "MCP server for Wildfire Detection"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

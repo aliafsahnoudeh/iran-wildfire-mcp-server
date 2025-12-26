@@ -112,7 +112,7 @@ def _query_overpass_api(
     """
 
     url = "https://overpass-api.de/api/interpreter"
-    headers = {"User-Agent": "Iran-Wildfire-MCP-Server/1.0"}
+    headers = {"User-Agent": "Wildfire-MCP-Server/1.0"}
 
     for attempt in range(max_retries):
         try:

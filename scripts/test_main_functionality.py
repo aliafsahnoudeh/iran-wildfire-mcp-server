@@ -140,7 +140,7 @@ def main():
                 size_max=15,
                 zoom=5,
                 mapbox_style="open-street-map",
-                title=f"Fire Detections in Iran ({len(likely_fires)} fires)",
+                title=f"({len(detected_fires)} fires)",
                 height=700,
             )
 
