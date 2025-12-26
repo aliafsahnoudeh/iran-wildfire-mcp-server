@@ -1,0 +1,74 @@
+EVALUATION AND NON-PRODUCTION LICENSE
+
+Copyright (c) 2025. All rights reserved.
+
+This software and associated documentation files (the "Software") are provided
+for evaluation and non-production use only.
+
+TERMS AND CONDITIONS
+
+1. GRANT OF LICENSE
+
+   Subject to the terms and conditions of this License, the copyright holder
+   hereby grants you a limited, non-exclusive, non-transferable license to
+   use, copy, modify, and distribute the Software solely for evaluation,
+   testing, research, and non-production purposes.
+
+2. RESTRICTIONS
+
+   2.1 PRODUCTION USE PROHIBITED
+
+   You are expressly PROHIBITED from using the Software in:
+
+   - Production environments
+   - Commercial applications
+   - Live operational systems
+   - Any customer-facing or revenue-generating services
+
+   without obtaining prior written approval from the copyright holder.
+
+   2.2 APPROVAL REQUIRED
+
+   Any use of the Software in production or commercial contexts requires
+   explicit written authorization from the copyright holder. To request
+   approval, contact the repository owner.
+
+3. REDISTRIBUTION
+
+   Redistribution of the Software, with or without modification, is permitted
+   provided that:
+
+   a) This license and copyright notice are included in all copies or
+   substantial portions of the Software.
+
+   b) Recipients are made aware that production use requires separate approval.
+
+   c) The redistributed Software is used only for evaluation and non-production
+   purposes unless production approval has been obtained.
+
+4. NO WARRANTY
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+5. LIMITATION OF LIABILITY
+
+   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+   USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+6. TERMINATION
+
+   This License is effective until terminated. Your rights under this License
+   will terminate automatically without notice if you fail to comply with any
+   of its terms. Upon termination, you must cease all use of the Software and
+   destroy all copies.
+
+7. CONTACT FOR PRODUCTION USE
+
+   For production licensing inquiries and approval requests, please contact
+   the repository owner through the project's official channels.
+
+END OF TERMS AND CONDITIONS
