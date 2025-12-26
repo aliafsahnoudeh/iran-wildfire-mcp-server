@@ -326,14 +326,13 @@ class ReverseGeocodingResponse:
         ]
         return cls(locations=locations)
 
-    @classmethod
-    def to_human_readable(cls, response: "ReverseGeocodingResponse") -> str:
+    def to_human_readable(self) -> str:
         """Convert reverse geocoding data to human-readable format."""
         output = []
-        for loc in response.locations:
+        for loc in self.locations:
             output.append(f"Location Name: {loc.name}")
             output.append(f"Country: {loc.country}")
             if loc.state:
                 output.append(f"State: {loc.state}")
-            output.append(f" Coordinates: [{loc.lat:.4f}°N, {loc.lon:.4f}°E]")
+            output.append(f"Coordinates: [{loc.lat:.4f}°N, {loc.lon:.4f}°E]")
         return "\n".join(output)

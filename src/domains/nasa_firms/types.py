@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum
 
+from pydantic import BaseModel
+
 
 class DayNight(str, Enum):
     DAY = "D"
@@ -11,6 +13,19 @@ class Confidence(str, Enum):
     LOW = "l"
     NOMINAL = "n"
     HIGH = "h"
+
+
+class BoundingBox(BaseModel):
+    """Geographical bounding box defined by min and max latitudes and longitudes."""
+
+    min_latitude: float
+    max_latitude: float
+    min_longitude: float
+    max_longitude: float
+
+    def to_string(self) -> str:
+        """Convert bounding box to string format required by NASA FIRMS API."""
+        return f"{self.min_longitude},{self.min_latitude},{self.max_longitude},{self.max_latitude}"
 
 
 @dataclass
@@ -48,8 +63,7 @@ class RawFireData:
         temp_ti4_c = self.bright_ti4 - 273.15
         temp_ti5_c = self.bright_ti5 - 273.15
 
-        return f"""{index if index is not None else ""}.
-Location: {self.latitude:.4f}°, {self.longitude:.4f}°
+        return f"""Location: {self.latitude:.4f}°, {self.longitude:.4f}°
 Detection Time: {self.acq_date} at {hour}:{minute} UTC ({daynight_display})
 Satellite: {self.satellite} ({self.instrument})
 Confidence: {confidence_display}
@@ -60,5 +74,4 @@ Fire Characteristics:
   - Brightness Temp (Band I5/T5): {temp_ti5_c:.1f}°C ({self.bright_ti5:.1f}K)
   - Pixel Size: {self.scan:.3f}° × {self.track:.3f}°
 
-Data Version: {self.version}
-"""
+Data Version: {self.version}"""
