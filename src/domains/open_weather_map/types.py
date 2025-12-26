@@ -334,5 +334,5 @@ class ReverseGeocodingResponse:
             output.append(f"Country: {loc.country}")
             if loc.state:
                 output.append(f"State: {loc.state}")
-            output.append(f" Coordinates: [{loc.lat:.4f}°N, {loc.lon:.4f}°E]")
+            output.append(f"Coordinates: [{loc.lat:.4f}°N, {loc.lon:.4f}°E]")
         return "\n".join(output)

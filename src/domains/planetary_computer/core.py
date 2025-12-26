@@ -34,6 +34,13 @@ def is_wildfire_fuel_potential(
     min_ratio: float = 0.4,
 ) -> Tuple[bool, float]:
     """
+    Check if the given latitude and longitude are in a potential wildfire fuel area.
+    Args:
+      lat (float): Latitude of the location.
+      lon (float): Longitude of the location.
+      window_size (int): Size of the square window (in pixels) to analyze around the point.
+      min_ratio (float): Minimum ratio of burnable land cover required to consider
+                         the area as potential wildfire fuel.
     Returns:
       (fuel_possible, burnable_ratio)
 

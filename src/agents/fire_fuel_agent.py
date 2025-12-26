@@ -10,16 +10,27 @@ class FireFuelAgent:
     def __init__(self):
         pass
 
-    def is_fire_fuel(self, latitude: float, longitude: float) -> bool:
+    def is_fire_fuel(
+        self,
+        lat: float,
+        lon: float,
+        window_size: int = 11,
+        min_ratio: float = 0.4,
+    ) -> bool:
         """Check if the given latitude and longitude are in a potential wildfire fuel area.
-
         Args:
-            latitude (float): Latitude of the location.
-            longitude (float): Longitude of the location.
+          lat (float): Latitude of the location.
+          lon (float): Longitude of the location.
+          window_size (int): Size of the square window (in pixels) to analyze around the point.
+          min_ratio (float): Minimum ratio of burnable land cover required to consider
+                             the area as potential wildfire fuel.
+
         Returns:
             bool: True if the location is in a potential wildfire fuel area, False otherwise.
         """
-        fuel_possible, _ = is_wildfire_fuel_potential(lat=latitude, lon=longitude)
+        fuel_possible, _ = is_wildfire_fuel_potential(
+            lat=lat, lon=lon, window_size=window_size, min_ratio=min_ratio
+        )
         return fuel_possible
 
     def get_worldcover_class(

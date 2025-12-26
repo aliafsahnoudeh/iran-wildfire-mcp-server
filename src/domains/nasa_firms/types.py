@@ -48,8 +48,7 @@ class RawFireData:
         temp_ti4_c = self.bright_ti4 - 273.15
         temp_ti5_c = self.bright_ti5 - 273.15
 
-        return f"""{index if index is not None else ""}.
-Location: {self.latitude:.4f}°, {self.longitude:.4f}°
+        return f"""Location: {self.latitude:.4f}°, {self.longitude:.4f}°
 Detection Time: {self.acq_date} at {hour}:{minute} UTC ({daynight_display})
 Satellite: {self.satellite} ({self.instrument})
 Confidence: {confidence_display}
@@ -60,5 +59,4 @@ Fire Characteristics:
   - Brightness Temp (Band I5/T5): {temp_ti5_c:.1f}°C ({self.bright_ti5:.1f}K)
   - Pixel Size: {self.scan:.3f}° × {self.track:.3f}°
 
-Data Version: {self.version}
-"""
+Data Version: {self.version}"""
