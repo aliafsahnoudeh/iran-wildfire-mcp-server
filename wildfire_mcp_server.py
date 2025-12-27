@@ -91,8 +91,10 @@ async def get_weather_forecast(
     All weather data can be obtained in JSON and XML formats.
 
     Parameters:
-        latitude	required	Latitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API
-        longitude	required	Longitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API
+        latitude	required	Latitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and
+            the other way around, please use our Geocoding API
+        longitude	required	Longitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates
+            and the other way around, please use our Geocoding API
 
     Returns:
         str
@@ -113,8 +115,10 @@ async def get_current_air_pollution_data(
     Fetch current air pollution data for the given latitude and longitude.
 
     Parameters:
-        latitude	required	Latitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API
-        longitude	required	Longitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API
+        latitude	required	Latitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates
+            and the other way around, please use our Geocoding API
+        longitude	required	Longitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates
+            and the other way around, please use our Geocoding API
 
     Returns:
         str
@@ -137,8 +141,10 @@ async def get_historical_air_pollution_data(
     Air Pollution API provides historical air pollution data for any coordinates on the globe.
 
     Parameters:
-    latitude	required	Latitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API
-    longitude	required	Longitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API
+    latitude	required	Latitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates
+        and the other way around, please use our Geocoding API
+    longitude	required	Longitude. If you need the geocoder to automatic convert city names and zip-codes to geo coordinates
+        and the other way around, please use our Geocoding API
     start_date	required	Start of the period (format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)
     end_date	required	End of the period (format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)
 
