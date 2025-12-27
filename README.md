@@ -15,49 +15,17 @@ This MCP server provides AI assistants with tools to detect and analyze wildfire
 - **Fire Fuel Assessment**: Determine if a location contains potential wildfire fuel based on land cover data
 - **Customizable Filtering**: Filter fires by radiative power, brightness temperature, and geographic boundaries
 
-## Installation
+## Prerequisites
 
-### Prerequisites
-
-- Python 3.8 or higher
-- Poetry or pip for dependency management
-
-### Setup
-
-1. Clone the repository:
-
-```bash
-git clone <repository-url>
-cd iran-wildfire-mcp-server
-```
-
-2. Install dependencies:
-
-```bash
-poetry install
-# or
-pip install -r requirements.txt
-```
-
-3. Configure API keys (if required):
+Configure API keys (if required):
 
 - NASA FIRMS Map Key
 - OpenWeatherMap API Key
 - Google Earth Engine credentials (if applicable)
 
-## Usage
+## Available Tools
 
-### Running the Server
-
-```bash
-python wildfire_mcp_server.py
-```
-
-The server communicates via standard I/O (stdio transport) and can be integrated with any MCP-compatible client.
-
-### Available Tools
-
-#### `get_potential_wildfires`
+### `get_potential_wildfires`
 
 Get potential wildfires for a specific date using NASA FIRMS data.
 
@@ -69,7 +37,7 @@ Get potential wildfires for a specific date using NASA FIRMS data.
 - `in_iran` (bool): If True, filters fires to only show those within Iran's borders (useful for Iran-specific monitoring)
 - `bounding_box` (BoundingBox, optional): Custom bounding box to limit search area to any geographic region
 
-#### `get_address`
+### `get_address`
 
 Get the address for given coordinates.
 
@@ -78,7 +46,7 @@ Get the address for given coordinates.
 - `latitude` (float): Latitude of the location
 - `longitude` (float): Longitude of the location
 
-#### `get_weather_forecast`
+### `get_weather_forecast`
 
 Get 5-day weather forecast with 3-hour intervals.
 
@@ -87,7 +55,7 @@ Get 5-day weather forecast with 3-hour intervals.
 - `latitude` (float): Latitude of the location
 - `longitude` (float): Longitude of the location
 
-#### `get_current_air_pollution_data`
+### `get_current_air_pollution_data`
 
 Fetch current air pollution data.
 
@@ -96,7 +64,7 @@ Fetch current air pollution data.
 - `latitude` (float): Latitude of the location
 - `longitude` (float): Longitude of the location
 
-#### `get_historical_air_pollution_data`
+### `get_historical_air_pollution_data`
 
 Fetch historical air pollution data for a date range.
 
@@ -107,7 +75,7 @@ Fetch historical air pollution data for a date range.
 - `start_date` (str): Start of period (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)
 - `end_date` (str): End of period (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)
 
-#### `is_fire_fuel`
+### `is_fire_fuel`
 
 Check if a location contains potential wildfire fuel.
 
@@ -140,9 +108,9 @@ export MCP_REQUEST_TIMEOUT_RESET_ON_PROGRESS=true
 
 ```bash
 # Test individual components
-python scripts/test_nasa_firms.py
-python scripts/test_main_functionality.py
-python scripts/test_overpass.py
+uv run scripts/test_nasa_firms.py
+uv run scripts/test_main_functionality.py
+uv run scripts/test_overpass.py
 ```
 
 ## Architecture
