@@ -6,6 +6,10 @@ A Model Context Protocol (MCP) server for detecting, monitoring, and analyzing p
 
 This MCP server provides AI assistants with tools to detect and analyze wildfire activity anywhere in the world by integrating real-time satellite data, weather forecasts, air pollution metrics, and geographical information. It's designed to help identify potential wildfires and assess their environmental impact.
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/aliafsahnoudeh-wildfire-mcp-server).
+
 ## Features
 
 - **Fire Detection**: Query NASA FIRMS (Fire Information for Resource Management System) for active fire hotspots
